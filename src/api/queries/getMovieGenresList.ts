@@ -1,6 +1,6 @@
 import axiosInstance from 'libs/axios/axiosInstance';
 
-type Response = {
+export type GenresListResponse = {
   genres: {
     id: number;
     name: string;
@@ -9,7 +9,9 @@ type Response = {
 
 export default async function getMovieGenresList() {
   try {
-    const response = await axiosInstance.get<Response>('/genre/movie/list');
+    const response = await axiosInstance.get<GenresListResponse>(
+      '/genre/movie/list',
+    );
     return response.data.genres;
   } catch (error) {
     console.error('error at getMovieGenresList: ', error);
