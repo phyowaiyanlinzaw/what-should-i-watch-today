@@ -2,6 +2,7 @@ import {View, Text, SafeAreaView} from 'react-native';
 import React, {FC} from 'react';
 import {BottomTabBarScreenProps} from 'navigators/type';
 import {COLORS} from 'utils/color';
+import useGetGenresList from 'hooks/useGetGenresList';
 
 type Props = BottomTabBarScreenProps<'MainScreen'>;
 

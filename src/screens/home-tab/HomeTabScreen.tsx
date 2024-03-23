@@ -2,10 +2,12 @@ import {SafeAreaView, Text, View} from 'react-native';
 import React from 'react';
 import {BottomTabBarScreenProps} from '../../navigators/type';
 import {COLORS} from 'utils/color';
+import useGetGenresList from 'hooks/useGetGenresList';
 
 type Props = BottomTabBarScreenProps<'HomeScreen'>;
 
 export default function HomeTabScreen({navigation}: Props) {
+  const {genresList} = useGetGenresList();
   return (
     <SafeAreaView
       style={{

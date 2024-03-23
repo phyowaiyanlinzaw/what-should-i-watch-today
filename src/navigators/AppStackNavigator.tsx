@@ -11,15 +11,6 @@ import {useLoadingModalStore} from 'stores/useLoadingModalStore';
 export default function AppStackNavigator() {
   const showLoading = useLoadingModalStore(state => state.showLoading);
 
-  const openLoading = useLoadingModalStore(state => state.openLoading);
-  const closeLoading = useLoadingModalStore(state => state.closeLoading);
-
-  useEffect(() => {
-    setTimeout(() => {
-      openLoading();
-    }, 1000);
-  }, []);
-
   return (
     <>
       <Stack.Navigator
