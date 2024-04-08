@@ -16,9 +16,9 @@ export default function BottomTabNavigator() {
         headerShown: false,
       }}
       tabBar={BottomTabBar}>
-      <Tabs.Screen name="HomeScreen" component={HomeTabScreen} />
+      {/* <Tabs.Screen name="HomeScreen" component={HomeTabScreen} /> */}
       <Tabs.Screen name={'MainScreen'} component={MainTabScreen} />
-      <Tabs.Screen name="SettingsScreen" component={SettingsTabScreen} />
+      {/* <Tabs.Screen name="SettingsScreen" component={SettingsTabScreen} /> */}
     </Tabs.Navigator>
   );
 }

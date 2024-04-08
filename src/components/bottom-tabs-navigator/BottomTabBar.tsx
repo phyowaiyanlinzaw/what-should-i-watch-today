@@ -1,4 +1,11 @@
-import {View, Dimensions, Pressable, Text} from 'react-native';
+import {
+  View,
+  Dimensions,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  TouchableHighlight,
+} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import HomeOutlineIcon from 'assets/svg/bottom-tabs/home-outline.svg';
 import MainOutlineIcon from 'assets/svg/bottom-tabs/camera-outline.svg';
@@ -24,7 +31,7 @@ import {scale, moderateScale, verticalScale} from 'react-native-size-matters';
 import {COLORS} from 'utils/color';
 
 const menus = [
-  {
+  /* {
     id: '1',
     icon: (isFocused: boolean) =>
       isFocused ? (
@@ -33,7 +40,7 @@ const menus = [
         <HomeOutlineIcon width={scale(24)} height={verticalScale(24)} />
       ),
     href: 'HomeScreen',
-  },
+  }, */
   {
     id: '2',
     icon: (isFocused: boolean) =>
@@ -44,7 +51,7 @@ const menus = [
       ),
     href: 'MainScreen',
   },
-  {
+  /* {
     id: '3',
     icon: (isFocused: boolean) =>
       isFocused ? (
@@ -53,7 +60,7 @@ const menus = [
         <SettingsOutlineIcon width={scale(24)} height={verticalScale(24)} />
       ),
     href: 'SettingsScreen',
-  },
+  }, */
 ];
 
 type Props = {
@@ -134,33 +141,40 @@ export default function BottomTabBar({
   navigation,
 }: BottomTabBarProps) {
   return (
-    <View
+    <TouchableHighlight
       style={{
+        width: 100,
         backgroundColor: COLORS.blackish_1,
         flexDirection: 'row',
         position: 'absolute',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
         paddingHorizontal: 20,
         bottom: 40,
-        left: 20,
-        right: 20,
-        height: 60,
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        left: '50%',
+        right: '50%',
+        transform: [{translateX: -50}],
+        height: 100,
         flex: 1,
         elevation: 6,
-        borderRadius: 15,
+        borderRadius: 100 / 2,
         shadowColor: COLORS.blackish_1,
         shadowOpacity: 0.1,
         shadowOffset: {
           width: 10,
           height: 10,
         },
-      }}>
-      <TabBarComponent
+      }}
+      onPress={() => {}}
+      underlayColor={COLORS.blackish_1}>
+      <MainFilledIcon width={scale(24)} height={verticalScale(24)} />
+      {/* <TabBarComponent
         state={state}
         descriptors={descriptors}
         navigation={navigation}
-      />
-    </View>
+      /> */}
+    </TouchableHighlight>
   );
 }

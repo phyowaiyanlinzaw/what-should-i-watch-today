@@ -5,6 +5,7 @@ import {
   Pressable,
   TouchableOpacity,
   FlatList,
+  ScrollView,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {BottomTabBarScreenProps} from 'navigators/type';
@@ -36,6 +37,7 @@ import TVMovieIcon from 'assets/svg/genres/tv-movie.svg';
 import WarIcon from 'assets/svg/genres/war.svg';
 import WesternIcon from 'assets/svg/genres/western.svg';
 import GenreItem from './components/GenreItem';
+import SuggestionIcon from 'assets/svg/genres/suggestion.svg';
 
 const icons = [
   <ActionIcon height="100%" width="100%" />,
@@ -208,15 +210,15 @@ export default function MainTabScreen({}: Props) {
           </View>
         </View>
       </ReactNativeModal>
-      <View
+      <ScrollView
         style={{
           width: '100%',
-          alignItems: 'center',
-          justifyContent: 'center',
         }}>
         <FlatList
           horizontal
-          style={{padding: 10}}
+          style={{
+            padding: 20,
+          }}
           contentContainerStyle={{
             alignItems: 'center',
             justifyContent: 'center',
@@ -225,7 +227,14 @@ export default function MainTabScreen({}: Props) {
           showsHorizontalScrollIndicator={false}
           data={genresList}
           renderItem={({item, index}) => {
-            return <GenreItem icon={icons[index]} name={item.name} />;
+            return index !== 0 ? (
+              <GenreItem name={item.name} icon={icons[index]} />
+            ) : (
+              <GenreItem
+                name={'Random'}
+                icon={<SuggestionIcon height="100%" width="100%" />}
+              />
+            );
           }}
         />
         {moviesByGenres?.results && (
@@ -235,7 +244,7 @@ export default function MainTabScreen({}: Props) {
               : 'No movies found. Please Select Genre First'}
           </Text>
         )}
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
