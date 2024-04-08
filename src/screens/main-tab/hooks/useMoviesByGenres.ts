@@ -12,12 +12,10 @@ export default function useMoviesByGenres() {
     },
     onError: error => {
       closeLoading();
-      console.error('Error in useMoviesByGenres', error);
+      console.error(error);
     },
     onSuccess: (res, req) => {
       closeLoading();
-      console.log('Success in useMoviesByGenres', req);
-      console.log('Success in useMoviesByGenres', res);
     },
   });
 

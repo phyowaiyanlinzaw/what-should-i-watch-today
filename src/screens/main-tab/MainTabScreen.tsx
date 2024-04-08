@@ -6,13 +6,14 @@ import {
   TouchableOpacity,
   FlatList,
   ScrollView,
+  TouchableHighlight,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {BottomTabBarScreenProps} from 'navigators/type';
 import {COLORS} from 'utils/color';
 import useGetGenresList from 'hooks/useGetGenresList';
 import ReactNativeModal from 'react-native-modal';
-import {scale} from 'react-native-size-matters';
+import {scale, verticalScale} from 'react-native-size-matters';
 import {useFocusEffect} from '@react-navigation/native';
 import useMoviesByGenres from './hooks/useMoviesByGenres';
 import {MovieListResponse} from 'src/@types/tmdb/declarations';
@@ -38,6 +39,9 @@ import WarIcon from 'assets/svg/genres/war.svg';
 import WesternIcon from 'assets/svg/genres/western.svg';
 import GenreItem from './components/GenreItem';
 import SuggestionIcon from 'assets/svg/genres/suggestion.svg';
+import MainFilledIcon from 'assets/svg/bottom-tabs/camera-filled.svg';
+import MovieCard from './components/MovieCard';
+import {useLoadingModalStore} from 'stores/useLoadingModalStore';
 
 const icons = [
   <ActionIcon height="100%" width="100%" />,
@@ -81,15 +85,18 @@ export default function MainTabScreen({}: Props) {
     }
   };
 
-  /* useEffect(() => {
-    setShowModal(true);
+  const openLoading = useLoadingModalStore(state => state.openLoading);
+
+  useEffect(() => {
+    // setShowModal(true);
+    openLoading();
   }, []);
 
-  useFocusEffect(
+  /* useFocusEffect(
     React.useCallback(() => {
       setShowModal(true);
     }, []),
-  ); */
+  );  */
 
   return (
     <SafeAreaView
@@ -210,7 +217,7 @@ export default function MainTabScreen({}: Props) {
           </View>
         </View>
       </ReactNativeModal>
-      <ScrollView
+      <View
         style={{
           width: '100%',
         }}>
@@ -237,14 +244,73 @@ export default function MainTabScreen({}: Props) {
             );
           }}
         />
-        {moviesByGenres?.results && (
-          <Text style={{color: 'white', fontSize: 24}}>
-            {moviesByGenres.results.length > 0
-              ? moviesByGenres.results.map(movie => movie.title).join(', ')
-              : 'No movies found. Please Select Genre First'}
-          </Text>
-        )}
-      </ScrollView>
+        {moviesByGenres?.results &&
+          (moviesByGenres.results.length > 0 ? (
+            <FlatList
+              contentContainerStyle={{
+                gap: 10,
+              }}
+              style={{
+                padding: 20,
+              }}
+              data={moviesByGenres.results}
+              renderItem={item => {
+                return (
+                  <MovieCard
+                    description={item.item.overview}
+                    title={item.item.title}
+                    image={item.item.poster_path}
+                    rating={item.item.vote_average}
+                  />
+                );
+              }}
+            />
+          ) : (
+            <Text style={{color: 'white', fontSize: 24}}>
+              'No movies found. Please Select Genre First'
+            </Text>
+          ))}
+      </View>
+      <TouchableHighlight
+        style={{
+          borderColor: COLORS.bluish,
+          borderWidth: 1,
+
+          width: scale(80),
+          backgroundColor: COLORS.blackish_1,
+          flexDirection: 'row',
+          position: 'absolute',
+          alignItems: 'center',
+          justifyContent: 'center',
+          paddingHorizontal: 20,
+          bottom: 40,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          left: '50%',
+          right: '50%',
+          transform: [{translateX: -50}],
+          height: scale(80),
+          flex: 1,
+          elevation: 6,
+          borderRadius: 100 / 2,
+          shadowColor: COLORS.blackish_1,
+          shadowOpacity: 0.1,
+          shadowOffset: {
+            width: 10,
+            height: 10,
+          },
+        }}
+        onPress={() => {
+          setShowModal(true);
+        }}
+        underlayColor={COLORS.blackish_1}>
+        <MainFilledIcon width={scale(24)} height={verticalScale(24)} />
+        {/* <TabBarComponent
+        state={state}
+        descriptors={descriptors}
+        navigation={navigation}
+      /> */}
+      </TouchableHighlight>
     </SafeAreaView>
   );
 }
