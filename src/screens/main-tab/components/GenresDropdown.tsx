@@ -1,7 +1,7 @@
 import {GenresListResponse} from 'api/queries/getMovieGenresList';
 import React from 'react';
 import {View} from 'react-native';
-import {Dropdown, MultiSelect} from 'react-native-element-dropdown';
+import {MultiSelect} from 'react-native-element-dropdown';
 import {COLORS} from 'utils/color';
 
 export default function GenresDropdown({genres}: GenresListResponse) {
