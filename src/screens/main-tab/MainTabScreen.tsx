@@ -43,6 +43,7 @@ import SuggestionIcon from 'assets/svg/genres/suggestion.svg';
 import MainFilledIcon from 'assets/svg/bottom-tabs/camera-filled.svg';
 import MovieCard from './components/MovieCard';
 import {useLoadingModalStore} from 'stores/useLoadingModalStore';
+import BottomSheet, {BottomSheetView} from '@gorhom/bottom-sheet';
 
 const icons = [
   <ActionIcon height="100%" width="100%" />,
@@ -109,6 +110,8 @@ export default function MainTabScreen({}: Props) {
       setShowModal(true);
     }, []),
   );  */
+
+  const bottomSheetRef = useRef<BottomSheet>(null);
 
   return (
     <SafeAreaView
@@ -314,10 +317,10 @@ export default function MainTabScreen({}: Props) {
             width: 10,
             height: 10,
           },
-          zIndex: 100,
         }}
         onPress={() => {
-          setShowModal(true);
+          // setShowModal(true);
+          bottomSheetRef.current?.expand();
         }}
         underlayColor={COLORS.blackish_1}>
         <MainFilledIcon width={scale(24)} height={verticalScale(24)} />
@@ -332,10 +335,130 @@ export default function MainTabScreen({}: Props) {
           borderRadius: 90 / 2,
           width: scale(75),
           transform: [{translateX: -50}],
+          zIndex: -1,
         }}
         blurType="chromeMaterialDark"
         blurAmount={20}
       />
+      <BottomSheet
+        ref={bottomSheetRef}
+        index={1}
+        snapPoints={['25%', '50%']}
+        handleComponent={() => null}
+        backgroundComponent={() => null}
+        enablePanDownToClose={true}
+        onChange={index => {
+          console.log('index', index);
+        }}>
+        <BottomSheetView
+          style={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            padding: 10,
+            borderRadius: 10,
+            backgroundColor: 'black',
+            justifyContent: 'space-around',
+          }}>
+          {/* <BlurView
+            blurType="dark"
+            style={{
+              
+            }}> */}
+          {genresList?.map(genre => (
+            <Pressable
+              key={genre.id}
+              style={{
+                borderRadius: 10,
+                backgroundColor: selectedGenres?.includes(genre.id)
+                  ? COLORS.bluish
+                  : 'black',
+                padding: 10,
+                margin: 5,
+                width: scale(100),
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderColor: 'white',
+                borderWidth:
+                  selectedGenres && selectedGenres.includes(genre.id) ? 0 : 1,
+                height: scale(50),
+              }}
+              onPress={() => {
+                handleGenreSelect(genre.id);
+              }}>
+              <Text
+                style={{
+                  color: 'white',
+                  fontSize: 16,
+                  textAlign: 'center',
+                  fontWeight: '500',
+                }}>
+                {genre.name}
+              </Text>
+            </Pressable>
+          ))}
+          <View
+            style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginTop: 20,
+              flexDirection: 'row',
+              gap: 10,
+            }}>
+            <TouchableOpacity
+              style={{
+                backgroundColor: COLORS.bluish,
+                padding: 20,
+                justifyContent: 'center',
+                alignContent: 'center',
+                borderRadius: 10,
+                marginTop: 30,
+                width: scale(150),
+              }}
+              onPress={() => {
+                setShowModal(false);
+                getMoviesByGenres(selectedGenres).then(response => {
+                  setMoviesByGenres(response);
+                });
+              }}>
+              <Text
+                style={{
+                  textAlign: 'center',
+                  color: 'white',
+                  fontSize: 18,
+                  fontWeight: '600',
+                }}>
+                Suggest Me
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                backgroundColor: 'black',
+                padding: 20,
+                borderColor: COLORS.bluish,
+                borderWidth: 1,
+                justifyContent: 'center',
+                alignContent: 'center',
+                borderRadius: 10,
+                marginTop: 30,
+                width: scale(100),
+              }}
+              onPress={() => {
+                setShowModal(false);
+              }}>
+              <Text
+                style={{
+                  textAlign: 'center',
+                  color: 'white',
+                  fontSize: 18,
+                  fontWeight: '600',
+                }}>
+                Close
+              </Text>
+            </TouchableOpacity>
+          </View>
+          {/* </BlurView> */}
+        </BottomSheetView>
+      </BottomSheet>
     </SafeAreaView>
   );
 }
