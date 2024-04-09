@@ -89,7 +89,7 @@ export default function MainTabScreen({}: Props) {
 
   useEffect(() => {
     // setShowModal(true);
-    openLoading();
+    // openLoading();
   }, []);
 
   /* useFocusEffect(
