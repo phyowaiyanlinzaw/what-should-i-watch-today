@@ -8,7 +8,8 @@ import {
   ScrollView,
   TouchableHighlight,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import {BlurView} from '@react-native-community/blur';
+import React, {useEffect, useRef, useState} from 'react';
 import {BottomTabBarScreenProps} from 'navigators/type';
 import {COLORS} from 'utils/color';
 import useGetGenresList from 'hooks/useGetGenresList';
@@ -69,13 +70,29 @@ const icons = [
 type Props = BottomTabBarScreenProps<'MainScreen'>;
 
 export default function MainTabScreen({}: Props) {
-  const {genresList} = useGetGenresList();
+  const {genresList, isLoadingGenres} = useGetGenresList();
   const [selectedGenres, setSelectedGenres] = useState([0]);
   const [showModal, setShowModal] = useState(false);
 
   const {getMoviesByGenres} = useMoviesByGenres();
 
   const [moviesByGenres, setMoviesByGenres] = useState<MovieListResponse>();
+
+  const genreFlatListRef = useRef<FlatList>(null);
+
+  /* useEffect(() => {
+    const index = genresList
+      ? genresList.findIndex(genre => genre.id === selectedGenres[1])
+      : -1;
+    if (index === -1) {
+      setSelectedGenres([1]);
+    }
+    console.log('index', index);
+    genreFlatListRef.current?.scrollToIndex({
+      index: index === -1 ? 0 : index,
+      animated: true,
+    });
+  }, [selectedGenres]); */
 
   const handleGenreSelect = (genreId: number) => {
     if (selectedGenres && selectedGenres.includes(genreId)) {
@@ -86,11 +103,6 @@ export default function MainTabScreen({}: Props) {
   };
 
   const openLoading = useLoadingModalStore(state => state.openLoading);
-
-  useEffect(() => {
-    // setShowModal(true);
-    // openLoading();
-  }, []);
 
   /* useFocusEffect(
     React.useCallback(() => {
@@ -113,8 +125,10 @@ export default function MainTabScreen({}: Props) {
           justifyContent: 'center',
           alignItems: 'center',
         }}
+        onBackdropPress={() => setShowModal(false)}
         backdropOpacity={0.8}>
-        <View
+        <BlurView
+          blurType="dark"
           style={{
             flexDirection: 'row',
             flexWrap: 'wrap',
@@ -215,35 +229,40 @@ export default function MainTabScreen({}: Props) {
               </Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </BlurView>
       </ReactNativeModal>
       <View
         style={{
           width: '100%',
         }}>
-        <FlatList
-          horizontal
-          style={{
-            padding: 20,
-          }}
-          contentContainerStyle={{
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 10,
-          }}
-          showsHorizontalScrollIndicator={false}
-          data={genresList}
-          renderItem={({item, index}) => {
-            return index !== 0 ? (
-              <GenreItem name={item.name} icon={icons[index]} />
-            ) : (
-              <GenreItem
-                name={'Random'}
-                icon={<SuggestionIcon height="100%" width="100%" />}
-              />
-            );
-          }}
-        />
+        {!isLoadingGenres ? (
+          <FlatList
+            ref={genreFlatListRef}
+            horizontal
+            style={{
+              padding: 20,
+            }}
+            contentContainerStyle={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 10,
+            }}
+            showsHorizontalScrollIndicator={false}
+            data={genresList}
+            renderItem={({item, index}) => {
+              return index !== 0 ? (
+                <GenreItem name={item.name} icon={icons[index]} />
+              ) : (
+                <GenreItem
+                  name={'Random'}
+                  icon={<SuggestionIcon height="100%" width="100%" />}
+                />
+              );
+            }}
+          />
+        ) : (
+          <Text style={{color: 'white', fontSize: 24}}>Loading Genres...</Text>
+        )}
         {moviesByGenres?.results &&
           (moviesByGenres.results.length > 0 ? (
             <FlatList
@@ -273,44 +292,50 @@ export default function MainTabScreen({}: Props) {
       </View>
       <TouchableHighlight
         style={{
-          borderColor: COLORS.bluish,
-          borderWidth: 1,
-
-          width: scale(80),
-          backgroundColor: COLORS.blackish_1,
+          width: scale(75),
           flexDirection: 'row',
           position: 'absolute',
           alignItems: 'center',
           justifyContent: 'center',
           paddingHorizontal: 20,
-          bottom: 40,
+          bottom: 20,
           marginLeft: 'auto',
           marginRight: 'auto',
           left: '50%',
           right: '50%',
           transform: [{translateX: -50}],
-          height: scale(80),
+          height: scale(75),
           flex: 1,
           elevation: 6,
-          borderRadius: 100 / 2,
+          borderRadius: 90 / 2,
           shadowColor: COLORS.blackish_1,
           shadowOpacity: 0.1,
           shadowOffset: {
             width: 10,
             height: 10,
           },
+          zIndex: 100,
         }}
         onPress={() => {
           setShowModal(true);
         }}
         underlayColor={COLORS.blackish_1}>
         <MainFilledIcon width={scale(24)} height={verticalScale(24)} />
-        {/* <TabBarComponent
-        state={state}
-        descriptors={descriptors}
-        navigation={navigation}
-      /> */}
       </TouchableHighlight>
+      <BlurView
+        style={{
+          position: 'absolute',
+          left: '50%',
+          right: '50%',
+          bottom: 20,
+          height: scale(75),
+          borderRadius: 90 / 2,
+          width: scale(75),
+          transform: [{translateX: -50}],
+        }}
+        blurType="chromeMaterialDark"
+        blurAmount={20}
+      />
     </SafeAreaView>
   );
 }

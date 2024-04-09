@@ -3,6 +3,7 @@ import React from 'react';
 import {COLORS} from 'utils/color';
 import FastImage from 'react-native-fast-image';
 import {verticalScale} from 'react-native-size-matters';
+import {BlurView} from '@react-native-community/blur';
 
 export default function MovieCard({
   title,
@@ -34,7 +35,10 @@ export default function MovieCard({
           }}
         />
       )}
-      <View
+      <BlurView
+        blurType="dark"
+        blurAmount={10}
+        reducedTransparencyFallbackColor="black"
         style={{
           backgroundColor: COLORS.blackish_1,
           width: '100%',
@@ -53,7 +57,6 @@ export default function MovieCard({
             height: 200,
           }}
           onLoad={() => {
-            console.log('loaded');
             setFetchingImage(false);
           }}
         />
@@ -105,7 +108,7 @@ export default function MovieCard({
             {description}
           </Text>
         </View>
-      </View>
+      </BlurView>
     </>
   );
 }
