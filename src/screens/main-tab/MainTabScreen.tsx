@@ -5,17 +5,15 @@ import {
   Pressable,
   TouchableOpacity,
   FlatList,
-  ScrollView,
   TouchableHighlight,
 } from 'react-native';
 import {BlurView} from '@react-native-community/blur';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useMemo, useRef, useState} from 'react';
 import {BottomTabBarScreenProps} from 'navigators/type';
 import {COLORS} from 'utils/color';
 import useGetGenresList from 'hooks/useGetGenresList';
 import ReactNativeModal from 'react-native-modal';
 import {scale, verticalScale} from 'react-native-size-matters';
-import {useFocusEffect} from '@react-navigation/native';
 import useMoviesByGenres from './hooks/useMoviesByGenres';
 import {MovieListResponse} from 'src/@types/tmdb/declarations';
 import ActionIcon from 'assets/svg/genres/action.svg';
@@ -42,8 +40,11 @@ import GenreItem from './components/GenreItem';
 import SuggestionIcon from 'assets/svg/genres/suggestion.svg';
 import MainFilledIcon from 'assets/svg/bottom-tabs/camera-filled.svg';
 import MovieCard from './components/MovieCard';
-import {useLoadingModalStore} from 'stores/useLoadingModalStore';
-import BottomSheet, {BottomSheetView} from '@gorhom/bottom-sheet';
+import BottomSheet, {
+  BottomSheetModal,
+  BottomSheetModalProvider,
+  BottomSheetView,
+} from '@gorhom/bottom-sheet';
 
 const icons = [
   <ActionIcon height="100%" width="100%" />,
@@ -81,20 +82,6 @@ export default function MainTabScreen({}: Props) {
 
   const genreFlatListRef = useRef<FlatList>(null);
 
-  /* useEffect(() => {
-    const index = genresList
-      ? genresList.findIndex(genre => genre.id === selectedGenres[1])
-      : -1;
-    if (index === -1) {
-      setSelectedGenres([1]);
-    }
-    console.log('index', index);
-    genreFlatListRef.current?.scrollToIndex({
-      index: index === -1 ? 0 : index,
-      animated: true,
-    });
-  }, [selectedGenres]); */
-
   const handleGenreSelect = (genreId: number) => {
     if (selectedGenres && selectedGenres.includes(genreId)) {
       setSelectedGenres(selectedGenres.filter(id => id !== genreId));
@@ -102,18 +89,20 @@ export default function MainTabScreen({}: Props) {
       setSelectedGenres([...selectedGenres, genreId]);
     }
   };
-
-  const openLoading = useLoadingModalStore(state => state.openLoading);
-
-  /* useFocusEffect(
-    React.useCallback(() => {
-      setShowModal(true);
-    }, []),
-  );  */
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
   const bottomSheetRef = useRef<BottomSheet>(null);
 
+  // variables
+  const snapPoints = useMemo(() => ['25%', '50%', '74%'], []);
+
+  // callbacks
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
+
   return (
+    // <BottomSheetModalProvider>
     <SafeAreaView
       style={{
         flex: 1,
@@ -121,119 +110,6 @@ export default function MainTabScreen({}: Props) {
         alignItems: 'center',
         paddingVertical: 20,
       }}>
-      <ReactNativeModal
-        isVisible={showModal}
-        style={{
-          margin: 0,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-        onBackdropPress={() => setShowModal(false)}
-        backdropOpacity={0.8}>
-        <BlurView
-          blurType="dark"
-          style={{
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            padding: 10,
-            borderRadius: 10,
-            backgroundColor: 'black',
-            justifyContent: 'space-around',
-          }}>
-          {genresList?.map(genre => (
-            <Pressable
-              key={genre.id}
-              style={{
-                borderRadius: 10,
-                backgroundColor: selectedGenres?.includes(genre.id)
-                  ? COLORS.bluish
-                  : 'black',
-                padding: 10,
-                margin: 5,
-                width: scale(100),
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderColor: 'white',
-                borderWidth:
-                  selectedGenres && selectedGenres.includes(genre.id) ? 0 : 1,
-                height: scale(50),
-              }}
-              onPress={() => {
-                handleGenreSelect(genre.id);
-              }}>
-              <Text
-                style={{
-                  color: 'white',
-                  fontSize: 16,
-                  textAlign: 'center',
-                  fontWeight: '500',
-                }}>
-                {genre.name}
-              </Text>
-            </Pressable>
-          ))}
-          <View
-            style={{
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginTop: 20,
-              flexDirection: 'row',
-              gap: 10,
-            }}>
-            <TouchableOpacity
-              style={{
-                backgroundColor: COLORS.bluish,
-                padding: 20,
-                justifyContent: 'center',
-                alignContent: 'center',
-                borderRadius: 10,
-                marginTop: 30,
-                width: scale(150),
-              }}
-              onPress={() => {
-                setShowModal(false);
-                getMoviesByGenres(selectedGenres).then(response => {
-                  setMoviesByGenres(response);
-                });
-              }}>
-              <Text
-                style={{
-                  textAlign: 'center',
-                  color: 'white',
-                  fontSize: 18,
-                  fontWeight: '600',
-                }}>
-                Suggest Me
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{
-                backgroundColor: 'black',
-                padding: 20,
-                borderColor: COLORS.bluish,
-                borderWidth: 1,
-                justifyContent: 'center',
-                alignContent: 'center',
-                borderRadius: 10,
-                marginTop: 30,
-                width: scale(100),
-              }}
-              onPress={() => {
-                setShowModal(false);
-              }}>
-              <Text
-                style={{
-                  textAlign: 'center',
-                  color: 'white',
-                  fontSize: 18,
-                  fontWeight: '600',
-                }}>
-                Close
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </BlurView>
-      </ReactNativeModal>
       <View
         style={{
           width: '100%',
@@ -293,6 +169,20 @@ export default function MainTabScreen({}: Props) {
             </Text>
           ))}
       </View>
+      <BlurView
+        style={{
+          position: 'absolute',
+          left: '50%',
+          right: '50%',
+          bottom: 20,
+          height: scale(75),
+          borderRadius: 90 / 2,
+          width: scale(75),
+          transform: [{translateX: -50}],
+        }}
+        blurType="chromeMaterialDark"
+        blurAmount={20}
+      />
       <TouchableHighlight
         style={{
           width: scale(75),
@@ -319,34 +209,33 @@ export default function MainTabScreen({}: Props) {
           },
         }}
         onPress={() => {
-          // setShowModal(true);
           bottomSheetRef.current?.expand();
         }}
         underlayColor={COLORS.blackish_1}>
         <MainFilledIcon width={scale(24)} height={verticalScale(24)} />
       </TouchableHighlight>
-      <BlurView
-        style={{
-          position: 'absolute',
-          left: '50%',
-          right: '50%',
-          bottom: 20,
-          height: scale(75),
-          borderRadius: 90 / 2,
-          width: scale(75),
-          transform: [{translateX: -50}],
-          zIndex: -1,
-        }}
-        blurType="chromeMaterialDark"
-        blurAmount={20}
-      />
+
       <BottomSheet
+        handleStyle={{
+          backgroundColor: 'black',
+          borderRadius: 10,
+        }}
+        handleIndicatorStyle={{
+          backgroundColor: COLORS.bluish,
+        }}
+        backgroundStyle={{
+          backgroundColor: 'black',
+        }}
+        style={{
+          backgroundColor: 'black',
+        }}
         ref={bottomSheetRef}
-        index={1}
-        snapPoints={['25%', '50%']}
-        handleComponent={() => null}
-        backgroundComponent={() => null}
+        index={-1}
+        snapPoints={snapPoints}
         enablePanDownToClose={true}
+        // handleComponent={() => null}
+        // backgroundComponent={() => null}
+        // enablePanDownToClose={true}
         onChange={index => {
           console.log('index', index);
         }}>
@@ -359,11 +248,6 @@ export default function MainTabScreen({}: Props) {
             backgroundColor: 'black',
             justifyContent: 'space-around',
           }}>
-          {/* <BlurView
-            blurType="dark"
-            style={{
-              
-            }}> */}
           {genresList?.map(genre => (
             <Pressable
               key={genre.id}
@@ -415,10 +299,10 @@ export default function MainTabScreen({}: Props) {
                 width: scale(150),
               }}
               onPress={() => {
-                setShowModal(false);
                 getMoviesByGenres(selectedGenres).then(response => {
                   setMoviesByGenres(response);
                 });
+                bottomSheetRef.current?.close();
               }}>
               <Text
                 style={{
@@ -443,7 +327,7 @@ export default function MainTabScreen({}: Props) {
                 width: scale(100),
               }}
               onPress={() => {
-                setShowModal(false);
+                bottomSheetRef.current?.close();
               }}>
               <Text
                 style={{
@@ -456,9 +340,9 @@ export default function MainTabScreen({}: Props) {
               </Text>
             </TouchableOpacity>
           </View>
-          {/* </BlurView> */}
         </BottomSheetView>
       </BottomSheet>
     </SafeAreaView>
+    // </BottomSheetModalProvider>
   );
 }
