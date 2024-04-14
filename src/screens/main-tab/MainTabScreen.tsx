@@ -38,6 +38,7 @@ import WarIcon from 'assets/svg/genres/war.svg';
 import WesternIcon from 'assets/svg/genres/western.svg';
 import GenreItem from './components/GenreItem';
 import SuggestionIcon from 'assets/svg/genres/suggestion.svg';
+import PopularIcon from 'assets/svg/genres/popular.svg';
 import MainFilledIcon from 'assets/svg/bottom-tabs/camera-filled.svg';
 import MovieCard from './components/MovieCard';
 import BottomSheet, {
@@ -45,25 +46,26 @@ import BottomSheet, {
   BottomSheetModalProvider,
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
+import useGetPopularMovies from './hooks/useGetPopularMovies';
 
 const icons = [
-  <ActionIcon height="100%" width="100%" />,
-  <AdventureIcon height="100%" width="100%" />,
-  <AnimationIcon height="100%" width="100%" />,
-  <ComedyIcon height="100%" width="100%" />,
-  <CrimeIcon height="100%" width="100%" />,
-  <DocumentaryIcon height="100%" width="100%" />,
-  <DramaIcon height="100%" width="100%" />,
-  <FamilyIcon height="100%" width="100%" />,
-  <FantasyIcon height="100%" width="100%" />,
-  <HistoryIcon height="100%" width="100%" />,
-  <HorrorIcon height="100%" width="100%" />,
-  <MusicIcon height="100%" width="100%" />,
-  <MysteryIcon height="100%" width="100%" />,
-  <RomanceIcon height="100%" width="100%" />,
-  <ScienceFictionIcon height="100%" width="100%" />,
-  <TVMovieIcon height="100%" width="100%" />,
-  <ThrillerIcon height="100%" width="100%" />,
+  <ActionIcon height="100%" width="100%" color={COLORS.bluish} />,
+  <AdventureIcon height="100%" width="100%" color={COLORS.bluish} />,
+  <AnimationIcon height="100%" width="100%" color={COLORS.bluish} />,
+  <ComedyIcon height="100%" width="100%" color={COLORS.bluish} />,
+  <CrimeIcon height="100%" width="100%" color={COLORS.bluish} />,
+  <DocumentaryIcon height="100%" width="100%" color={COLORS.bluish} />,
+  <DramaIcon height="100%" width="100%" color={COLORS.bluish} />,
+  <FamilyIcon height="100%" width="100%" color={COLORS.bluish} />,
+  <FantasyIcon height="100%" width="100%" color={COLORS.bluish} />,
+  <HistoryIcon height="100%" width="100%" color={COLORS.bluish} />,
+  <HorrorIcon height="100%" width="100%" color={COLORS.bluish} />,
+  <MusicIcon height="100%" width="100%" color={COLORS.bluish} />,
+  <MysteryIcon height="100%" width="100%" color={COLORS.bluish} />,
+  <RomanceIcon height="100%" width="100%" color={COLORS.bluish} />,
+  <ScienceFictionIcon height="100%" width="100%" color={COLORS.bluish} />,
+  <TVMovieIcon height="100%" width="100%" color={COLORS.bluish} />,
+  <ThrillerIcon height="100%" width="100%" color={COLORS.bluish} />,
 
   <WarIcon height="100%" width="100%" />,
   <WesternIcon height="100%" width="100%" />,
@@ -77,6 +79,9 @@ export default function MainTabScreen({}: Props) {
   const [showModal, setShowModal] = useState(false);
 
   const {getMoviesByGenres} = useMoviesByGenres();
+
+  const {isLoadingPopularMovies, popularMovies, refetchPopularMovies} =
+    useGetPopularMovies();
 
   const [moviesByGenres, setMoviesByGenres] = useState<MovieListResponse>();
 
@@ -134,7 +139,13 @@ export default function MainTabScreen({}: Props) {
               ) : (
                 <GenreItem
                   name={'Random'}
-                  icon={<SuggestionIcon height="100%" width="100%" />}
+                  icon={
+                    <SuggestionIcon
+                      height="100%"
+                      width="100%"
+                      color={COLORS.bluish}
+                    />
+                  }
                 />
               );
             }}
