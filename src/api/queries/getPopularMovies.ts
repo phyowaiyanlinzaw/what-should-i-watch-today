@@ -7,7 +7,7 @@ export default async function getPopularMovies() {
     const res: AxiosResponse<MovieListResponse> = await axiosInstance.get(
       '/movie/popular',
     );
-    return res.data.results;
+    return res.data;
   } catch (error) {
     console.error('error at getPopularMovies: ', error);
   }

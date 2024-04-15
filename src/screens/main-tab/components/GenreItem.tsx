@@ -1,14 +1,16 @@
 import {BlurView} from '@react-native-community/blur';
 import React from 'react';
-import {Text, View} from 'react-native';
+import {Pressable, Text, View} from 'react-native';
 import {COLORS} from 'utils/color';
 
 export default function GenreItem({
   name,
   icon,
+  isSelected,
 }: {
   name: string;
   icon: React.JSX.Element;
+  isSelected: boolean;
 }) {
   return (
     <BlurView
@@ -18,7 +20,7 @@ export default function GenreItem({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingVertical: 10,
-        backgroundColor: COLORS.blackish_1,
+        backgroundColor: isSelected ? COLORS.bluish : COLORS.blackish_1,
         height: 80,
         width: 80,
         borderRadius: 10,

@@ -8,7 +8,7 @@ import {
   TouchableHighlight,
 } from 'react-native';
 import {BlurView} from '@react-native-community/blur';
-import React, {useCallback, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {BottomTabBarScreenProps} from 'navigators/type';
 import {COLORS} from 'utils/color';
 import useGetGenresList from 'hooks/useGetGenresList';
@@ -66,16 +66,21 @@ const icons = [
   <ScienceFictionIcon height="100%" width="100%" color={COLORS.bluish} />,
   <TVMovieIcon height="100%" width="100%" color={COLORS.bluish} />,
   <ThrillerIcon height="100%" width="100%" color={COLORS.bluish} />,
-
-  <WarIcon height="100%" width="100%" />,
-  <WesternIcon height="100%" width="100%" />,
+  <WarIcon height="100%" width="100%" color={COLORS.bluish} />,
+  <WesternIcon height="100%" width="100%" color={COLORS.bluish} />,
 ];
 
 type Props = BottomTabBarScreenProps<'MainScreen'>;
 
 export default function MainTabScreen({}: Props) {
   const {genresList, isLoadingGenres} = useGetGenresList();
-  const [selectedGenres, setSelectedGenres] = useState([0]);
+
+  const [selectedGenre, setSelectedGenre] = useState(0);
+
+  const handleSelectGenre = (genreId: number) => {
+    setSelectedGenre(genreId);
+  };
+
   const [showModal, setShowModal] = useState(false);
 
   const {getMoviesByGenres} = useMoviesByGenres();
@@ -83,17 +88,14 @@ export default function MainTabScreen({}: Props) {
   const {isLoadingPopularMovies, popularMovies, refetchPopularMovies} =
     useGetPopularMovies();
 
-  const [moviesByGenres, setMoviesByGenres] = useState<MovieListResponse>();
+  const [moviesList, setMoviesList] = useState<MovieListResponse>();
+
+  useEffect(() => {
+    setMoviesList(popularMovies);
+  }, [popularMovies]);
 
   const genreFlatListRef = useRef<FlatList>(null);
 
-  const handleGenreSelect = (genreId: number) => {
-    if (selectedGenres && selectedGenres.includes(genreId)) {
-      setSelectedGenres(selectedGenres.filter(id => id !== genreId));
-    } else {
-      setSelectedGenres([...selectedGenres, genreId]);
-    }
-  };
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -105,6 +107,12 @@ export default function MainTabScreen({}: Props) {
   const handlePresentModalPress = useCallback(() => {
     bottomSheetModalRef.current?.present();
   }, []);
+
+  //modified genres icons list
+  const genresIcons = icons.map((icon, index) => ({
+    id: genresList ? genresList[index].id : 0,
+    icon: icon,
+  }));
 
   return (
     // <BottomSheetModalProvider>
@@ -135,26 +143,49 @@ export default function MainTabScreen({}: Props) {
             data={genresList}
             renderItem={({item, index}) => {
               return index !== 0 ? (
-                <GenreItem name={item.name} icon={icons[index]} />
+                <Pressable
+                  onPress={() => {
+                    handleSelectGenre(item.id);
+                    getMoviesByGenres(item.id).then(response => {
+                      setMoviesList(response);
+                    });
+                  }}>
+                  <GenreItem
+                    name={item.name}
+                    icon={icons[index]}
+                    isSelected={
+                      selectedGenre === item.id
+                      /* selectedGenres?.includes(item.id) */
+                    }
+                  />
+                </Pressable>
               ) : (
-                <GenreItem
-                  name={'Random'}
-                  icon={
-                    <SuggestionIcon
-                      height="100%"
-                      width="100%"
-                      color={COLORS.bluish}
-                    />
-                  }
-                />
+                <Pressable
+                  onPress={() => {
+                    handleSelectGenre(0);
+                    refetchPopularMovies();
+                    setMoviesList(popularMovies);
+                  }}>
+                  <GenreItem
+                    isSelected={selectedGenre === 0}
+                    name={'Popular'}
+                    icon={
+                      <PopularIcon
+                        height="100%"
+                        width="100%"
+                        color={COLORS.bluish}
+                      />
+                    }
+                  />
+                </Pressable>
               );
             }}
           />
         ) : (
           <Text style={{color: 'white', fontSize: 24}}>Loading Genres...</Text>
         )}
-        {moviesByGenres?.results &&
-          (moviesByGenres.results.length > 0 ? (
+        {moviesList?.results &&
+          (moviesList.results.length > 0 ? (
             <FlatList
               contentContainerStyle={{
                 gap: 10,
@@ -162,7 +193,7 @@ export default function MainTabScreen({}: Props) {
               style={{
                 padding: 20,
               }}
-              data={moviesByGenres.results}
+              data={moviesList.results}
               renderItem={item => {
                 return (
                   <MovieCard
@@ -264,21 +295,22 @@ export default function MainTabScreen({}: Props) {
               key={genre.id}
               style={{
                 borderRadius: 10,
-                backgroundColor: selectedGenres?.includes(genre.id)
+                /* selectedGenres?.includes(genre.id)
                   ? COLORS.bluish
-                  : 'black',
+                  :  */
+                backgroundColor: 'black',
                 padding: 10,
                 margin: 5,
                 width: scale(100),
                 alignItems: 'center',
                 justifyContent: 'center',
                 borderColor: 'white',
-                borderWidth:
-                  selectedGenres && selectedGenres.includes(genre.id) ? 0 : 1,
+                /* borderWidth:
+                  selectedGenres && selectedGenres.includes(genre.id) ? 0 : 1, */
                 height: scale(50),
               }}
               onPress={() => {
-                handleGenreSelect(genre.id);
+                // handleGenreSelect(genre.id);
               }}>
               <Text
                 style={{
@@ -310,9 +342,9 @@ export default function MainTabScreen({}: Props) {
                 width: scale(150),
               }}
               onPress={() => {
-                getMoviesByGenres(selectedGenres).then(response => {
+                /* getMoviesByGenres(selectedGenres).then(response => {
                   setMoviesByGenres(response);
-                });
+                }); */
                 bottomSheetRef.current?.close();
               }}>
               <Text

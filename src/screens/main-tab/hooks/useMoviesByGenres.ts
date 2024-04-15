@@ -19,8 +19,8 @@ export default function useMoviesByGenres() {
     },
   });
 
-  const getMoviesByGenres = async (genres: number[]) => {
-    return mutateAsync({genres});
+  const getMoviesByGenres = async (genre: number) => {
+    return mutateAsync({genre});
   };
 
   return {
