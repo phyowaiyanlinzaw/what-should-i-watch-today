@@ -1,10 +1,11 @@
-import {View, Text, ActivityIndicator} from 'react-native';
+import {View, Text, ActivityIndicator, Dimensions} from 'react-native';
 import React from 'react';
 import {COLORS} from 'utils/color';
 import FastImage from 'react-native-fast-image';
-import {verticalScale} from 'react-native-size-matters';
 import {BlurView} from '@react-native-community/blur';
-
+import {MotiView} from 'moti';
+//@ts-ignore
+import {Skeleton} from 'moti-skeleton';
 export default function MovieCard({
   title,
   description,
@@ -21,19 +22,48 @@ export default function MovieCard({
   return (
     <>
       {fetchingImage && (
-        <ActivityIndicator
-          size="small"
-          color={COLORS.bluish}
+        <MotiView
           style={{
-            width: '100%',
-            flexDirection: 'row',
-            height: 200,
             borderRadius: 10,
-            overflow: 'hidden',
             marginBottom: 10,
-            backgroundColor: COLORS.blackish_1,
+            flexDirection: 'row',
           }}
-        />
+          transition={{
+            type: 'timing',
+            duration: 1000,
+            loop: true,
+          }}
+          animate={{
+            opacity: [0.5, 1],
+          }}>
+          <View style={{width: 130, height: 200, borderRadius: 10}}>
+            <Skeleton width={130} height={200} />
+          </View>
+          <View
+            style={{
+              flex: 1,
+              padding: 10,
+              gap: 10,
+              justifyContent: 'space-between',
+            }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}>
+              <Skeleton
+                width={Dimensions.get('window').width / 3}
+                height={20}
+              />
+              <Skeleton width={30} height={20} />
+            </View>
+            <Skeleton
+              width={Dimensions.get('window').width / 1.8}
+              height={150}
+            />
+          </View>
+        </MotiView>
       )}
       <BlurView
         blurType="dark"

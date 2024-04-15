@@ -16,6 +16,7 @@ module.exports = {
           screens: './src/screens',
           stores: './src/stores',
           utils: './src/utils',
+          'moti-skeleton': 'moti/skeleton/react-native-linear-gradient',
         },
       },
     ],

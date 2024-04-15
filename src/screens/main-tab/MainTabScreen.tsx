@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   FlatList,
   TouchableHighlight,
+  ActivityIndicator,
 } from 'react-native';
 import {BlurView} from '@react-native-community/blur';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
@@ -182,7 +183,7 @@ export default function MainTabScreen({}: Props) {
             }}
           />
         ) : (
-          <Text style={{color: 'white', fontSize: 24}}>Loading Genres...</Text>
+          <ActivityIndicator size="large" color={COLORS.bluish} />
         )}
         {moviesList?.results &&
           (moviesList.results.length > 0 ? (
