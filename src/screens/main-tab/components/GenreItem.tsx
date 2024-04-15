@@ -21,8 +21,8 @@ export default function GenreItem({
         justifyContent: 'space-between',
         paddingVertical: 10,
         backgroundColor: isSelected ? COLORS.bluish : COLORS.blackish_1,
-        height: 80,
-        width: 80,
+        height: 90,
+        width: 90,
         borderRadius: 10,
       }}>
       <View
@@ -34,7 +34,15 @@ export default function GenreItem({
         }}>
         {icon}
       </View>
-      <Text style={{color: 'white', fontSize: 12}}>{name}</Text>
+      <Text
+        style={{
+          color: 'white',
+          fontSize: 12,
+          fontWeight: 'bold',
+          textAlign: 'center',
+        }}>
+        {name}
+      </Text>
     </BlurView>
   );
 }

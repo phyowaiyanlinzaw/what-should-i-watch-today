@@ -9,11 +9,10 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import {BlurView} from '@react-native-community/blur';
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {BottomTabBarScreenProps} from 'navigators/type';
 import {COLORS} from 'utils/color';
 import useGetGenresList from 'hooks/useGetGenresList';
-import ReactNativeModal from 'react-native-modal';
 import {scale, verticalScale} from 'react-native-size-matters';
 import useMoviesByGenres from './hooks/useMoviesByGenres';
 import {MovieListResponse} from 'src/@types/tmdb/declarations';
@@ -42,11 +41,7 @@ import SuggestionIcon from 'assets/svg/genres/suggestion.svg';
 import PopularIcon from 'assets/svg/genres/popular.svg';
 import MainFilledIcon from 'assets/svg/bottom-tabs/camera-filled.svg';
 import MovieCard from './components/MovieCard';
-import BottomSheet, {
-  BottomSheetModal,
-  BottomSheetModalProvider,
-  BottomSheetView,
-} from '@gorhom/bottom-sheet';
+import BottomSheet, {BottomSheetView} from '@gorhom/bottom-sheet';
 import useGetPopularMovies from './hooks/useGetPopularMovies';
 
 const icons = [
@@ -76,18 +71,28 @@ type Props = BottomTabBarScreenProps<'MainScreen'>;
 export default function MainTabScreen({}: Props) {
   const {genresList, isLoadingGenres} = useGetGenresList();
 
+  const genreIcons = [
+    {
+      icon: <PopularIcon height="100%" width="100%" color={COLORS.bluish} />,
+      id: 0,
+      name: 'Popular',
+    },
+    ...icons.map((icon, index) => ({
+      icon,
+      id: genresList![index]?.id,
+      name: genresList![index]?.name,
+    })),
+  ];
+
   const [selectedGenre, setSelectedGenre] = useState(0);
 
   const handleSelectGenre = (genreId: number) => {
     setSelectedGenre(genreId);
   };
 
-  const [showModal, setShowModal] = useState(false);
-
   const {getMoviesByGenres} = useMoviesByGenres();
 
-  const {isLoadingPopularMovies, popularMovies, refetchPopularMovies} =
-    useGetPopularMovies();
+  const {popularMovies, refetchPopularMovies} = useGetPopularMovies();
 
   const [moviesList, setMoviesList] = useState<MovieListResponse>();
 
@@ -97,26 +102,12 @@ export default function MainTabScreen({}: Props) {
 
   const genreFlatListRef = useRef<FlatList>(null);
 
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   // variables
-  const snapPoints = useMemo(() => ['25%', '50%', '74%'], []);
-
-  // callbacks
-  const handlePresentModalPress = useCallback(() => {
-    bottomSheetModalRef.current?.present();
-  }, []);
-
-  //modified genres icons list
-  const genresIcons = icons.map((icon, index) => ({
-    id: genresList ? genresList[index].id : 0,
-    icon: icon,
-  }));
+  const snapPoints = useMemo(() => ['60%'], []);
 
   return (
-    // <BottomSheetModalProvider>
     <SafeAreaView
       style={{
         flex: 1,
@@ -141,9 +132,10 @@ export default function MainTabScreen({}: Props) {
               gap: 10,
             }}
             showsHorizontalScrollIndicator={false}
-            data={genresList}
+            data={genreIcons}
             renderItem={({item, index}) => {
-              return index !== 0 ? (
+              return (
+                // index !== 0 ? (
                 <Pressable
                   onPress={() => {
                     handleSelectGenre(item.id);
@@ -153,14 +145,15 @@ export default function MainTabScreen({}: Props) {
                   }}>
                   <GenreItem
                     name={item.name}
-                    icon={icons[index]}
+                    icon={genreIcons[index].icon}
                     isSelected={
                       selectedGenre === item.id
                       /* selectedGenres?.includes(item.id) */
                     }
                   />
                 </Pressable>
-              ) : (
+              );
+              /* ) : (
                 <Pressable
                   onPress={() => {
                     handleSelectGenre(0);
@@ -179,7 +172,7 @@ export default function MainTabScreen({}: Props) {
                     }
                   />
                 </Pressable>
-              );
+              ); */
             }}
           />
         ) : (
@@ -259,18 +252,58 @@ export default function MainTabScreen({}: Props) {
       </TouchableHighlight>
 
       <BottomSheet
+        handleComponent={() => {
+          return (
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: 20,
+              }}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}>
+                <SuggestionIcon
+                  height={scale(24)}
+                  width={scale(24)}
+                  color={COLORS.bluish}
+                />
+              </View>
+              <Pressable
+                onPress={() => {
+                  bottomSheetRef.current?.close();
+                }}
+                style={{
+                  padding: 10,
+                  borderRadius: 10,
+                }}>
+                <Text
+                  style={{
+                    color: COLORS.bluish,
+                    fontSize: 18,
+                    fontWeight: '600',
+                  }}>
+                  Close
+                </Text>
+              </Pressable>
+            </View>
+          );
+        }}
         handleStyle={{
-          backgroundColor: 'black',
+          backgroundColor: COLORS.blackish_1,
           borderRadius: 10,
         }}
         handleIndicatorStyle={{
           backgroundColor: COLORS.bluish,
         }}
         backgroundStyle={{
-          backgroundColor: 'black',
+          backgroundColor: COLORS.blackish_1,
         }}
         style={{
-          backgroundColor: 'black',
+          borderRadius: 20,
         }}
         ref={bottomSheetRef}
         index={-1}
@@ -284,109 +317,72 @@ export default function MainTabScreen({}: Props) {
         }}>
         <BottomSheetView
           style={{
-            flexDirection: 'row',
-            flexWrap: 'wrap',
             padding: 10,
             borderRadius: 10,
-            backgroundColor: 'black',
-            justifyContent: 'space-around',
+            backgroundColor: COLORS.blackish_1,
           }}>
-          {genresList?.map(genre => (
-            <Pressable
-              key={genre.id}
-              style={{
-                borderRadius: 10,
-                /* selectedGenres?.includes(genre.id)
-                  ? COLORS.bluish
-                  :  */
-                backgroundColor: 'black',
-                padding: 10,
-                margin: 5,
-                width: scale(100),
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderColor: 'white',
-                /* borderWidth:
-                  selectedGenres && selectedGenres.includes(genre.id) ? 0 : 1, */
-                height: scale(50),
-              }}
-              onPress={() => {
-                // handleGenreSelect(genre.id);
-              }}>
-              <Text
-                style={{
-                  color: 'white',
-                  fontSize: 16,
-                  textAlign: 'center',
-                  fontWeight: '500',
-                }}>
-                {genre.name}
-              </Text>
-            </Pressable>
-          ))}
           <View
             style={{
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginTop: 20,
-              flexDirection: 'row',
-              gap: 10,
+              alignItems: 'flex-start',
+              marginBottom: 20,
             }}>
-            <TouchableOpacity
+            <Text
               style={{
-                backgroundColor: COLORS.bluish,
-                padding: 20,
-                justifyContent: 'center',
-                alignContent: 'center',
-                borderRadius: 10,
-                marginTop: 30,
-                width: scale(150),
-              }}
-              onPress={() => {
-                /* getMoviesByGenres(selectedGenres).then(response => {
-                  setMoviesByGenres(response);
-                }); */
-                bottomSheetRef.current?.close();
+                color: 'white',
+                fontSize: 18,
+                fontWeight: '600',
+                marginBottom: 20,
               }}>
-              <Text
-                style={{
-                  textAlign: 'center',
-                  color: 'white',
-                  fontSize: 18,
-                  fontWeight: '600',
-                }}>
-                Suggest Me
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{
-                backgroundColor: 'black',
-                padding: 20,
-                borderColor: COLORS.bluish,
-                borderWidth: 1,
-                justifyContent: 'center',
-                alignContent: 'center',
-                borderRadius: 10,
-                marginTop: 30,
-                width: scale(100),
+              Select Genre
+            </Text>
+            <FlatList
+              showsHorizontalScrollIndicator={false}
+              horizontal
+              data={genreIcons}
+              renderItem={({item, index}) => {
+                return (
+                  <Pressable
+                    onPress={() => {
+                      handleSelectGenre(item.id);
+                      getMoviesByGenres(item.id).then(response => {
+                        setMoviesList(response);
+                      });
+                    }}>
+                    <GenreItem
+                      name={item.name}
+                      icon={genreIcons[index].icon}
+                      isSelected={selectedGenre === item.id}
+                    />
+                  </Pressable>
+                );
               }}
-              onPress={() => {
-                bottomSheetRef.current?.close();
-              }}>
-              <Text
-                style={{
-                  textAlign: 'center',
-                  color: 'white',
-                  fontSize: 18,
-                  fontWeight: '600',
-                }}>
-                Close
-              </Text>
-            </TouchableOpacity>
+            />
           </View>
+          <TouchableOpacity
+            style={{
+              backgroundColor: COLORS.bluish,
+              padding: 20,
+              justifyContent: 'center',
+              alignContent: 'center',
+              borderRadius: 10,
+              marginTop: 30,
+              width: scale(150),
+            }}
+            onPress={() => {
+              bottomSheetRef.current?.close();
+            }}>
+            <Text
+              style={{
+                textAlign: 'center',
+                color: 'white',
+                fontSize: 18,
+                fontWeight: '600',
+              }}>
+              Suggest Me
+            </Text>
+          </TouchableOpacity>
         </BottomSheetView>
       </BottomSheet>
     </SafeAreaView>
-    // </BottomSheetModalProvider>
   );
 }
