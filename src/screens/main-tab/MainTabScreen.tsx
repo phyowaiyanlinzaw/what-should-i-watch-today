@@ -43,6 +43,8 @@ import MainFilledIcon from 'assets/svg/bottom-tabs/camera-filled.svg';
 import MovieCard from './components/MovieCard';
 import BottomSheet, {BottomSheetView} from '@gorhom/bottom-sheet';
 import useGetPopularMovies from './hooks/useGetPopularMovies';
+import PlusIcon from 'assets/svg/filter/plus.svg';
+import MinusIcon from 'assets/svg/filter/minus.svg';
 
 const icons = [
   <ActionIcon height="100%" width="100%" color={COLORS.bluish} />,
@@ -66,6 +68,12 @@ const icons = [
   <WesternIcon height="100%" width="100%" color={COLORS.bluish} />,
 ];
 
+type FilterType = {
+  genre: number;
+  rating: number;
+  isAdult: boolean;
+};
+
 type Props = BottomTabBarScreenProps<'MainScreen'>;
 
 export default function MainTabScreen({}: Props) {
@@ -79,8 +87,8 @@ export default function MainTabScreen({}: Props) {
     },
     ...icons.map((icon, index) => ({
       icon,
-      id: genresList![index]?.id,
-      name: genresList![index]?.name,
+      id: genresList?.[index]?.id,
+      name: genresList?.[index]?.name,
     })),
   ];
 
@@ -106,6 +114,12 @@ export default function MainTabScreen({}: Props) {
 
   // variables
   const snapPoints = useMemo(() => ['60%'], []);
+
+  const [filterState, setFilterState] = useState<FilterType>({
+    genre: 0,
+    rating: 0,
+    isAdult: false,
+  });
 
   return (
     <SafeAreaView
@@ -133,9 +147,9 @@ export default function MainTabScreen({}: Props) {
             }}
             showsHorizontalScrollIndicator={false}
             data={genreIcons}
+            keyExtractor={item => item.id.toString()}
             renderItem={({item, index}) => {
               return (
-                // index !== 0 ? (
                 <Pressable
                   onPress={() => {
                     handleSelectGenre(item.id);
@@ -146,33 +160,10 @@ export default function MainTabScreen({}: Props) {
                   <GenreItem
                     name={item.name}
                     icon={genreIcons[index].icon}
-                    isSelected={
-                      selectedGenre === item.id
-                      /* selectedGenres?.includes(item.id) */
-                    }
+                    isSelected={selectedGenre === item.id}
                   />
                 </Pressable>
               );
-              /* ) : (
-                <Pressable
-                  onPress={() => {
-                    handleSelectGenre(0);
-                    refetchPopularMovies();
-                    setMoviesList(popularMovies);
-                  }}>
-                  <GenreItem
-                    isSelected={selectedGenre === 0}
-                    name={'Popular'}
-                    icon={
-                      <PopularIcon
-                        height="100%"
-                        width="100%"
-                        color={COLORS.bluish}
-                      />
-                    }
-                  />
-                </Pressable>
-              ); */
             }}
           />
         ) : (
@@ -181,6 +172,7 @@ export default function MainTabScreen({}: Props) {
         {moviesList?.results &&
           (moviesList.results.length > 0 ? (
             <FlatList
+              keyExtractor={item => item.id.toString()}
               contentContainerStyle={{
                 gap: 10,
               }}
@@ -335,28 +327,118 @@ export default function MainTabScreen({}: Props) {
               }}>
               Select Genre
             </Text>
-            <FlatList
-              showsHorizontalScrollIndicator={false}
-              horizontal
-              data={genreIcons}
-              renderItem={({item, index}) => {
-                return (
-                  <Pressable
-                    onPress={() => {
-                      handleSelectGenre(item.id);
-                      getMoviesByGenres(item.id).then(response => {
-                        setMoviesList(response);
-                      });
-                    }}>
-                    <GenreItem
-                      name={item.name}
-                      icon={genreIcons[index].icon}
-                      isSelected={selectedGenre === item.id}
-                    />
-                  </Pressable>
-                );
-              }}
-            />
+            {!isLoadingGenres ? (
+              <FlatList
+                showsHorizontalScrollIndicator={false}
+                horizontal
+                ListFooterComponent={
+                  <View style={{width: 20}}>
+                    <Text
+                      style={{
+                        color: 'white',
+                        fontSize: 18,
+                        fontWeight: '600',
+                        marginBottom: 20,
+                      }}>
+                      -
+                    </Text>
+                  </View>
+                }
+                data={genresList}
+                keyExtractor={item => item!.id!.toString()}
+                renderItem={({item, index}) => {
+                  return (
+                    <Pressable
+                      style={{
+                        backgroundColor:
+                          filterState.genre === item.id
+                            ? COLORS.bluish
+                            : COLORS.blackish_1,
+                        padding: 10,
+                        borderRadius: 10,
+                        marginRight: 10,
+                        justifyContent: 'center',
+                      }}
+                      onPress={() => {
+                        setFilterState(prev => {
+                          return {
+                            ...prev,
+                            genre: item.id,
+                          };
+                        });
+                      }}>
+                      <Text style={{color: 'white'}}>{item.name}</Text>
+                    </Pressable>
+                  );
+                }}
+              />
+            ) : (
+              <ActivityIndicator size="large" color={COLORS.bluish} />
+            )}
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+            }}>
+            <View
+              style={{
+                marginBottom: 20,
+              }}>
+              <Text
+                style={{
+                  color: 'white',
+                  fontSize: 18,
+                  fontWeight: '600',
+                  marginBottom: 20,
+                }}>
+                Minimum Rating
+              </Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                }}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setFilterState(prev => {
+                      return {
+                        ...prev,
+                        rating: prev.rating > 0 ? prev.rating - 1 : 0,
+                      };
+                    });
+                  }}>
+                  <MinusIcon
+                    height={scale(24)}
+                    width={scale(24)}
+                    color={COLORS.bluish}
+                  />
+                </TouchableOpacity>
+                <Text
+                  style={{
+                    color: 'white',
+                    fontSize: 18,
+                    fontWeight: '600',
+                    marginHorizontal: 10,
+                  }}>
+                  {Math.round(filterState.rating * 10) / 10}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    setFilterState(prev => {
+                      return {
+                        ...prev,
+                        rating: prev.rating < 9 ? prev.rating + 1 : 9,
+                      };
+                    });
+                  }}>
+                  <PlusIcon
+                    height={scale(24)}
+                    width={scale(24)}
+                    color={COLORS.bluish}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
           <TouchableOpacity
             style={{
