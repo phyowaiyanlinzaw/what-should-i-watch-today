@@ -7,6 +7,7 @@ import {
   FlatList,
   TouchableHighlight,
   ActivityIndicator,
+  Dimensions,
 } from 'react-native';
 import {BlurView} from '@react-native-community/blur';
 import React, {useEffect, useMemo, useRef, useState} from 'react';
@@ -46,6 +47,7 @@ import useGetPopularMovies from './hooks/useGetPopularMovies';
 import PlusIcon from 'assets/svg/filter/plus.svg';
 import MinusIcon from 'assets/svg/filter/minus.svg';
 import FilterIcon from 'assets/svg/filter/filter.svg';
+import {FlashList} from '@shopify/flash-list';
 
 const icons = [
   <ActionIcon height="100%" width="100%" color={COLORS.bluish} />,
@@ -190,7 +192,7 @@ export default function MainTabScreen({}: Props) {
         />
         {/* {moviesList?.results &&
           (moviesList.results.length > 0 ? ( */}
-        <FlatList
+        {/* <FlatList
           keyExtractor={item => item.id.toString()}
           contentContainerStyle={{
             gap: 10,
@@ -226,7 +228,51 @@ export default function MainTabScreen({}: Props) {
               />
             );
           }}
-        />
+        /> */}
+        <View
+          style={{
+            width: Dimensions.get('window').width - 40,
+            height: Dimensions.get('window').height - 200,
+            backgroundColor: COLORS.blackish_2,
+            padding: 20,
+            borderRadius: 20,
+            shadowColor: COLORS.blackish_1,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          <FlashList
+            style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+              alignSelf: 'center',
+            }}
+            onEndReached={() => {
+              if (hasNextPagePopularMovies) {
+                fetchNextPagePopularMovies();
+              }
+            }}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={
+              isFetchingNextPagePopularMovies ? (
+                <ActivityIndicator size="large" color={COLORS.bluish} />
+              ) : null
+            }
+            showsVerticalScrollIndicator={false}
+            keyExtractor={item => item.id.toString()}
+            estimatedItemSize={200}
+            data={popularMoviesData}
+            renderItem={({item}) => {
+              return (
+                <MovieCard
+                  description={item.overview}
+                  title={item.title}
+                  image={item.poster_path}
+                  rating={item.vote_average}
+                />
+              );
+            }}
+          />
+        </View>
         {/* ) : (
             <Text style={{color: 'white', fontSize: 24}}>
               'No movies found. Please Select Genre First'
