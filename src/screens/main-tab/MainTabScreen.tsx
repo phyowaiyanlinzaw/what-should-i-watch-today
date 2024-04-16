@@ -45,6 +45,7 @@ import BottomSheet, {BottomSheetView} from '@gorhom/bottom-sheet';
 import useGetPopularMovies from './hooks/useGetPopularMovies';
 import PlusIcon from 'assets/svg/filter/plus.svg';
 import MinusIcon from 'assets/svg/filter/minus.svg';
+import FilterIcon from 'assets/svg/filter/filter.svg';
 
 const icons = [
   <ActionIcon height="100%" width="100%" color={COLORS.bluish} />,
@@ -153,9 +154,9 @@ export default function MainTabScreen({}: Props) {
                 <Pressable
                   onPress={() => {
                     handleSelectGenre(item.id);
-                    getMoviesByGenres(item.id).then(response => {
-                      setMoviesList(response);
-                    });
+                    item.id === 0
+                      ? setMoviesList(popularMovies)
+                      : getMoviesByGenres(item.id).then(setMoviesList);
                   }}>
                   <GenreItem
                     name={item.name}
