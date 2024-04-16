@@ -101,13 +101,20 @@ export default function MainTabScreen({}: Props) {
 
   const {getMoviesByGenres} = useMoviesByGenres();
 
-  const {popularMovies, refetchPopularMovies} = useGetPopularMovies();
+  const {
+    fetchNextPagePopularMovies,
+    hasNextPagePopularMovies,
+    isFetchingNextPagePopularMovies,
+    popularMoviesData,
+  } = useGetPopularMovies();
 
-  const [moviesList, setMoviesList] = useState<MovieListResponse>();
+  // const [moviesList, setMoviesList] = useState<MovieListResponse>();
 
-  useEffect(() => {
-    setMoviesList(popularMovies);
-  }, [popularMovies]);
+  // useEffect(() => {
+  //   if (popularMoviesData) {
+  //     setMoviesList(popularMoviesData.pages[0].movies);
+  //   }
+  // }, [popularMoviesData]);
 
   const genreFlatListRef = useRef<FlatList>(null);
 
@@ -153,10 +160,10 @@ export default function MainTabScreen({}: Props) {
               return (
                 <Pressable
                   onPress={() => {
-                    handleSelectGenre(item.id);
+                    /* handleSelectGenre(item.id);
                     item.id === 0
                       ? setMoviesList(popularMovies)
-                      : getMoviesByGenres(item.id).then(setMoviesList);
+                      : getMoviesByGenres(item.id).then(setMoviesList); */
                   }}>
                   <GenreItem
                     name={item.name}
@@ -170,33 +177,62 @@ export default function MainTabScreen({}: Props) {
         ) : (
           <ActivityIndicator size="large" color={COLORS.bluish} />
         )}
-        {moviesList?.results &&
-          (moviesList.results.length > 0 ? (
-            <FlatList
-              keyExtractor={item => item.id.toString()}
-              contentContainerStyle={{
-                gap: 10,
-              }}
-              style={{
-                padding: 20,
-              }}
-              data={moviesList.results}
-              renderItem={item => {
-                return (
-                  <MovieCard
-                    description={item.item.overview}
-                    title={item.item.title}
-                    image={item.item.poster_path}
-                    rating={item.item.vote_average}
-                  />
-                );
-              }}
-            />
-          ) : (
+        <FilterIcon
+          height={scale(20)}
+          width={scale(20)}
+          color={COLORS.bluish}
+          style={{
+            alignSelf: 'flex-end',
+            marginRight: 30,
+            marginVertical: 10,
+            padding: 10,
+          }}
+        />
+        {/* {moviesList?.results &&
+          (moviesList.results.length > 0 ? ( */}
+        <FlatList
+          keyExtractor={item => item.id.toString()}
+          contentContainerStyle={{
+            gap: 10,
+          }}
+          style={{
+            padding: 20,
+          }}
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={10}
+          updateCellsBatchingPeriod={30}
+          initialNumToRender={10}
+          windowSize={10}
+          data={popularMoviesData}
+          onEndReached={() => {
+            if (hasNextPagePopularMovies) {
+              fetchNextPagePopularMovies();
+            }
+          }}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            isFetchingNextPagePopularMovies ? (
+              <ActivityIndicator size="large" color={COLORS.bluish} />
+            ) : null
+          }
+          showsVerticalScrollIndicator={false}
+          renderItem={item => {
+            return (
+              <MovieCard
+                description={item.item.overview}
+                title={item.item.title}
+                image={item.item.poster_path}
+                rating={item.item.vote_average}
+              />
+            );
+          }}
+        />
+        {/* ) : (
             <Text style={{color: 'white', fontSize: 24}}>
               'No movies found. Please Select Genre First'
             </Text>
-          ))}
+          ))
+          } */}
       </View>
       <BlurView
         style={{
